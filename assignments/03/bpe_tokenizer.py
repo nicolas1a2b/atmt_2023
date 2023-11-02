@@ -3,12 +3,31 @@
 
 from transformers import AutoTokenizer
 from collections import defaultdict
+import sys
+import pickle
+
+train_target = sys.argv[1]
+
+"""
+train_file = 'data/en-fr/raw/train.en'
+target_file = 'data/en-fr/raw/train.fr'
+
+filename = ''
+if train_target == 1:
+    filename = train_file
+else:
+    filename = target_file
+"""
 
 
-#corpus = sys.argv[1]
-with open('train.de', 'r') as file:
+
+
+#filename = 'train.de'
+
+with open(train_target, 'r') as file:
     # Read the entire content of the file into a string
     corpus = [file.read()]
+
 
 # Print or manipulate the file content as needed
 tokenizer = AutoTokenizer.from_pretrained("gpt2")
@@ -22,9 +41,6 @@ for text in corpus:
     for word in new_words:
         word_freqs[word] += 1
 
-print("word_freqs")
-print(word_freqs)
-
 alphabet = []
 
 for word in word_freqs.keys():
@@ -32,9 +48,6 @@ for word in word_freqs.keys():
         if letter not in alphabet:
             alphabet.append(letter)
 alphabet.sort()
-
-print("alphabet")
-print(alphabet)
 
 vocab = ["<|endoftext|>"] + alphabet.copy()
 
@@ -53,10 +66,12 @@ def compute_pair_freqs(splits):
 
 pair_freqs = compute_pair_freqs(splits)
 
+"""
 for i, key in enumerate(pair_freqs.keys()):
     print(f"{key}: {pair_freqs[key]}")
     if i >= 5:
         break
+"""
 
 best_pair = ""
 max_freq = None
@@ -65,9 +80,6 @@ for pair, freq in pair_freqs.items():
     if max_freq is None or max_freq < freq:
         best_pair = pair
         max_freq = freq
-
-print("best_pair max_freq")
-print(best_pair, max_freq)
 
 merges = {}
 def merge_pair(a, b, splits):
@@ -87,7 +99,6 @@ def merge_pair(a, b, splits):
 
 vocab_size = 30
 
-print(len(vocab))
 while len(vocab) < 150:
     pair_freqs = compute_pair_freqs(splits)
     best_pair = ""
@@ -99,12 +110,6 @@ while len(vocab) < 150:
     splits = merge_pair(*best_pair, splits)
     merges[best_pair] = best_pair[0] + best_pair[1]
     vocab.append(best_pair[0] + best_pair[1])
-
-print("merges")
-print(merges)
-
-print("vocab")
-print(vocab)
 
 def tokenize(text):
     pre_tokenize_result = tokenizer._tokenizer.pre_tokenizer.pre_tokenize_str(text)
@@ -122,4 +127,5 @@ def tokenize(text):
 
     return sum(splits, [])
 
-print(tokenize("Ihr Ziel im Leben ist es, Schauspielerin zu werden"))
+print(tokenize(corpus[0]))
+

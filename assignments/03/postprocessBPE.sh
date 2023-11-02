@@ -21,7 +21,7 @@ with open('assignments/03/translations/translations.txt', 'rb') as file:
 modified_data = binary_data.replace(b'@@ ', b'').replace(b'@@', b'')
 
 # Write the modified binary data back to the file
-with open('output_file.txt', 'wb') as file:
+with open('assignments/03/translations/translations.p.txt', 'wb') as file:
     file.write(modified_data)
 EOF
 

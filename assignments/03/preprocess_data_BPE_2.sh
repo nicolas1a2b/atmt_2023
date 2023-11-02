@@ -17,7 +17,7 @@ mkdir -p $data/preprocessedBPE/
 
 
 #Standard
-cat "data/en-fr/raw/train.fr" "data/en-fr/raw/train.en" | subword-nmt learn-bpe -s 1000 -o "data/en-fr/preprocessedBPE/codes_file"
+cat "data/en-fr/raw/train.fr" "data/en-fr/raw/train.en" | subword-nmt learn-bpe -s 2000 -o "data/en-fr/preprocessedBPE/codes_file"
 subword-nmt apply-bpe -c "data/en-fr/preprocessedBPE/codes_file" < "data/en-fr/raw/train.fr" | subword-nmt get-vocab > "data/en-fr/preprocessedBPE/dict.fr"
 subword-nmt apply-bpe -c "data/en-fr/preprocessedBPE/codes_file" < "data/en-fr/raw/train.en"| subword-nmt get-vocab > "data/en-fr/preprocessedBPE/dict.en"
 

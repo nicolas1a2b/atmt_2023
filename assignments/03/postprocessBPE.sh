@@ -1,6 +1,9 @@
 #!/bin/bash
 # -*- coding: utf-8 -*-
 
+translations_path=$1
+translations_clean_path=$2
+
 set -e
 
 pwd=`dirname "$(readlink -f "$0")"`
@@ -13,7 +16,11 @@ data=$base/data/$tgt-$src/
 cd $base
 
 python3 <<EOF
-with open('assignments/03/translations/translations.txt', 'rb') as file:
+
+translations_path = "$translations_path"
+translations_clean_path = "$translations_clean_path"
+
+with open(translations_path, 'rb') as file:
     # Read the binary data from the file
     binary_data = file.read()
 
@@ -21,11 +28,8 @@ with open('assignments/03/translations/translations.txt', 'rb') as file:
 modified_data = binary_data.replace(b'@@ ', b'').replace(b'@@', b'')
 
 # Write the modified binary data back to the file
-with open('assignments/03/translations/translations.p.txt', 'wb') as file:
+with open(translations_clean_path, 'wb') as file:
     file.write(modified_data)
 EOF
-
-
-
 
 echo "done!"

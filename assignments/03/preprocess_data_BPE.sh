@@ -26,16 +26,16 @@ mkdir -p $data/$preprocessed_folder/
 
 # --- Preprocessing Step 1/2: Similar to the original preprocessing
 # normalize and tokenize raw data
-cat $data_raw/raw/train.$src | perl moses_scripts/normalize-punctuation.perl -l $src | perl moses_scripts/tokenizer.perl -l $src -a -q > $data/$preprocessed_folder/train.$src.p
-cat $data_raw/raw/train.$tgt | perl moses_scripts/normalize-punctuation.perl -l $tgt | perl moses_scripts/tokenizer.perl -l $tgt -a -q > $data/$preprocessed_folder/train.$tgt.p
+cat $data_raw/raw/train.$src | perl moses_scripts/normalize-punctuation.perl -l $src | perl moses_scripts/tokenizer.perl -l $src -a -q > $data/$preprocessed_folder/train_intermediate.$src.p
+cat $data_raw/raw/train.$tgt | perl moses_scripts/normalize-punctuation.perl -l $tgt | perl moses_scripts/tokenizer.perl -l $tgt -a -q > $data/$preprocessed_folder/train_intermediate.$tgt.p
 
 # train truecase models
-perl moses_scripts/train-truecaser.perl --model $data/$preprocessed_folder/tm.$src --corpus $data/$preprocessed_folder/train.$src.p
-perl moses_scripts/train-truecaser.perl --model $data/$preprocessed_folder/tm.$tgt --corpus $data/$preprocessed_folder/train.$tgt.p
+perl moses_scripts/train-truecaser.perl --model $data/$preprocessed_folder/tm.$src --corpus $data/$preprocessed_folder/train_intermediate.$src.p
+perl moses_scripts/train-truecaser.perl --model $data/$preprocessed_folder/tm.$tgt --corpus $data/$preprocessed_folder/train_intermediate.$tgt.p
 
 # apply truecase models to splits
-cat $data/$preprocessed_folder/train.$src.p | perl moses_scripts/truecase.perl --model $data/$preprocessed_folder/tm.$src > $data/$preprocessed_folder/train_intermediate.$src
-cat $data/$preprocessed_folder/train.$tgt.p | perl moses_scripts/truecase.perl --model $data/$preprocessed_folder/tm.$tgt > $data/$preprocessed_folder/train_intermediate.$tgt
+cat $data/$preprocessed_folder/train_intermediate.$src.p | perl moses_scripts/truecase.perl --model $data/$preprocessed_folder/tm.$src > $data/$preprocessed_folder/train_intermediate.$src
+cat $data/$preprocessed_folder/train_intermediate.$tgt.p | perl moses_scripts/truecase.perl --model $data/$preprocessed_folder/tm.$tgt > $data/$preprocessed_folder/train_intermediate.$tgt
 
 # prepare remaining splits with learned models
 for split in valid test tiny_train
@@ -45,8 +45,8 @@ do
 done
 
 # remove tmp files
-rm $data/$preprocessed_folder/train.$src.p
-rm $data/$preprocessed_folder/train.$tgt.p
+rm $data/$preprocessed_folder/train_intermediate.$src.p
+rm $data/$preprocessed_folder/train_intermediate.$tgt.p
 
 
 # --- Preprocessing Step 2/2: Based on Sennrich BPE subword-nmt https://github.com/rsennrich/subword-nmt
@@ -59,8 +59,8 @@ subword-nmt apply-bpe -c $data/$preprocessed_folder/codes_file --vocabulary $dat
 subword-nmt apply-bpe -c $data/$preprocessed_folder/codes_file --vocabulary $data/$preprocessed_folder/dict.$tgt --vocabulary-threshold $vocab_threshold < $data/$preprocessed_folder/train_intermediate.$tgt  > $data/$preprocessed_folder/train.$tgt
 
 #Test
-subword-nmt apply-bpe -c $data/$preprocessed_folder/codes_file --vocabulary $data/$preprocessed_folder/dict.$src --vocabulary-threshold $vocab_threshold < $data/$preprocessed_folder/valid_intermediate.$src  > $data/$preprocessed_folder/test.$src
-subword-nmt apply-bpe -c $data/$preprocessed_folder/codes_file --vocabulary $data/$preprocessed_folder/dict.$tgt --vocabulary-threshold $vocab_threshold < $data/$preprocessed_folder/valid_intermediate.$tgt > $data/$preprocessed_folder/test.$tgt
+subword-nmt apply-bpe -c $data/$preprocessed_folder/codes_file --vocabulary $data/$preprocessed_folder/dict.$src --vocabulary-threshold $vocab_threshold < $data/$preprocessed_folder/test_intermediate.$src  > $data/$preprocessed_folder/test.$src
+subword-nmt apply-bpe -c $data/$preprocessed_folder/codes_file --vocabulary $data/$preprocessed_folder/dict.$tgt --vocabulary-threshold $vocab_threshold < $data/$preprocessed_folder/test_intermediate.$tgt > $data/$preprocessed_folder/test.$tgt
 
 #Tiny
 subword-nmt apply-bpe -c $data/$preprocessed_folder/codes_file --vocabulary $data/$preprocessed_folder/dict.$src --vocabulary-threshold $vocab_threshold < $data/$preprocessed_folder/tiny_train_intermediate.$src  > $data/$preprocessed_folder/tiny_train.$src

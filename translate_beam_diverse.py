@@ -34,6 +34,8 @@ def get_args():
     parser.add_argument('--alpha', default=0.0, type=float, help='alpha for softer length normalization')
     # Number of N translations
     parser.add_argument('--n_translations', default=3, type=float, help='Number of translations')
+    # Diverse Penalty Gamma
+    parser.add_argument('--gamma', default=1, type=float, help='Gamma for diverse penalty')
 
     return parser.parse_args()
 
@@ -169,6 +171,11 @@ def main(args):
                     node = nodes[i]
                     search = node.search
 
+                    # ------------------ START OF NEW CODE FOR ASSIGNMENT 5 -----------------
+                    # Here we are defining the penalty term. The gamme can be passed as an argment
+                    penalty = args.gamma * j
+                    gamma_log_p = (log_probs[i, :, j] - penalty)[0]
+
                     # __QUESTION 4: How are "add" and "add_final" different? 
                     # What would happen if we did not make this distinction?
 
@@ -186,9 +193,11 @@ def main(args):
                         node = BeamSearchNode(
                             search, node.emb, node.lstm_out, node.final_hidden,
                             node.final_cell, node.mask, torch.cat((prev_words[i][0].view([1]),
-                            next_word)), node.logp + log_p, node.length + 1
+                            next_word)), node.logp + gamma_log_p, node.length + 1
                             )
                         search.add(-node.eval(args.alpha), node)
+
+                    # ------------------ END OF NEW CODE FOR ASSIGNMENT 5 -----------------
 
             # #import pdb;pdb.set_trace()
             # __QUESTION 5: What happens internally when we prune our beams?
